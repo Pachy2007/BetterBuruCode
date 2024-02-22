@@ -7,42 +7,51 @@ import org.firstinspires.ftc.teamcode.Robot.Hardware;
 
 public class ActiveIntake {
 
-    public static boolean ENABLE=true;
-    public static double intakePower=.8 , reversePower=-.8 , idlePower=0;
+    public static boolean ENABLE = true;
+    public static boolean REVERSE = false;
     DcMotorEx motor;
-    enum State{
-        INTAKE(intakePower),
-        REVERSE(reversePower),
-        IDLE(idlePower);
+    public static double runningPower = 0.5, reversePower = -0.5;
+
+    enum State {
+        RUNNING(runningPower), IDLE(0), REVERSE(reversePower);
         double power;
-        State(double power)
-        {
-            this.power=power;
+
+        State(double power) {
+            this.power = power;
         }
     }
-    State state;
-    public ActiveIntake(State initialState , boolean REVERSE)
-    {
-        if(!ENABLE)motor=null;
-        else motor= Hardware.mch0;
-        if(REVERSE)motor.setDirection(DcMotorSimple.Direction.REVERSE);
-        state=initialState;
 
+    State state;
+
+    public ActiveIntake(State initialState) {
+        if (!ENABLE) motor = null;
+        else motor = Hardware.mch3;
+        this.state = initialState;
+        if (REVERSE) motor.setDirection(DcMotorSimple.Direction.REVERSE);
     }
-    private void updatePower()
-    {
+
+    public void setState(State state) {
+        if (state != this.state) {
+            this.state = state;
+        }
+    }
+
+    public State getState() {
+        return state;
+    }
+
+    private void updateStateValues() {
+        State.REVERSE.power = reversePower;
+        State.RUNNING.power = runningPower;
+    }
+
+    private void updateHardware() {
         motor.setPower(state.power);
     }
-    public void updateStateValues()
-    {
-        State.INTAKE.power=intakePower;
-        State.REVERSE.power=reversePower;
-        State.IDLE.power=idlePower;
-    }
-    public void update()
-    {
-        if(!ENABLE)return;
+
+    public void update() {
+        if (!ENABLE) return;
         updateStateValues();
-        updatePower();
+        updateHardware();
     }
 }
